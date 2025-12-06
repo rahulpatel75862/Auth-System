@@ -1,110 +1,87 @@
 const User = require("../models/User");
 const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-
-export const register = async(req, res) => {
-    const {username, email, password} = req.body;
-    if(!username || !email || !password){
-        return res.status(400).json({message: 'All Fields are required'})
-    }
+const signin = require('../middlewares/authMiddlewares').signin
+exports.registerUser = async(req, res) => {
     try{
+        let {username, email, password, role} = req.body;
+        if(!username || !email || !password || !role){
+            return res.status(403).json({error: 'All fields are required'});
+        }
+        username = String(username).trim();
+        email = String(email).trim().toLowerCase();
+        if(!username || !email || !password){
+            return res.status(403).json({error: 'Fields cannot be empty or whiteSpace'})
+        }
         const existingUser = await User.findOne({email});
         if(existingUser){
-            return res.status(400).json({message: 'User already exists'})
-        };
-        const hashedPassword = await bcrypt.hash(password,10);
-        const user = new User({
+            return res.status(401).json({error: 'user already exists.'})
+        }
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({
             username,
             email,
-            password: hashedPassword
-        })
-        await user.save();
-    } catch(error){
-        return res.status(500).json({message: 'Server Error'})
-    }
-}
-
-export const login = async(req, res) => {
-    const {email, password}=req.body;
-    if(!email || !password){
-        return res.status(400).json({message: 'All the fields are required'})
-    }
-    try{
-        const user = await User.findOne({email});
-        if(!user){
-            return res.status(400).json({message: 'User does not exists'})
-        }
-        const isMatch = await bcrypt.compare(password, user.password);
-        if(!isMatch){
-            return res.status(400).json({message:'Wrong password'})
-        }
-        const accessToken = jwt.sign({
-            id:user._id,
-            role: user.role
-        }, process.env.access_token, {expiresIn: '15m'});
-        
-        const refreshToken = jwt.sign({
-            id: user._id,
-            role:user.role,
-        }, process.env.refresh_token, {expiresIn: '7d'})
-        res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            secure: false,
-            sameSite: 'strict'
-        })
-        res.status(200).json({
-            accessToken,
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email,
-                role: user.role
-            }
-        })
-
-    } catch(error){
-        return res.status(500).json({message: 'Server Error'})
-    }
-}
-
-export const refreshToken = async(req, res) => {
-    const token = req.cookies.refreshToken;
-    if(!token){
-        return res.status(401).json({message: 'Refresh Token not found'})
-    }
-    try{
-        const decoded = jwt.verify(token, process.env.refresh_token);
-        const user = await User.findById(decoded.id);
-        if(!user){
-            return res.status(404).json({message: 'user not found'})
-        }
-        const newAccessToken = jwt.sign({
-            id:user._id,
-            role: user.role
-        }, process.env.access_token, {expiresIn: '15m'})
-        res.status(200).json({
-            accesToken : newAccessToken,
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email,
-                role: user.role
-            }
-        })
-    } catch(error){
-        return res.status(500).json({message: 'Something went wrong'})
-    }
-}
-
-export const logout = async(req, res) => {
-    try{
-        res.clearCookie('refreshToken', {
-            httpOnly: true,
-            secure: false,
-            sameSite: 'strict'
+            password: hashedPassword,
+            role: role || 'user'
         });
-        res.status(200).json({message: 'Logout Successfully'})
+        await newUser.save();
+        const token = signin(newUser);
+        res.status(201).json({
+            token,
+            user: {
+                id: newUser._id,
+                username: newUser.username,
+                email: newUser.email,
+                role: newUser.role
+            }
+        })
     } catch(error){
+        console.log(error);
         return res.status(500).json({message: 'Server Error'})
+    }
+}
+
+exports.signinUser = async(req, res) => {
+    try{
+        let {email, password} = req.body;
+        if(!email || !password){
+            return res.status(403).json({error:'Please enter username and password'});
+        }
+        email = String(email).trim().toLowerCase();
+        const existingUser = await User.findOne({email});
+        if(!existingUser){
+            return res.status(401).json({error: 'User does not exists'});
+        };
+        const match = await bcrypt.compare(password, existingUser.password);
+        if(!match){
+            return res.status(401).json({error: 'Invalid credentials'})
+        }
+        const token = signin(existingUser);
+        res.status(200).json({
+            token,
+            user: {
+                id: existingUser._id,
+                username: existingUser.username,
+                email: existingUser.email, 
+                role: existingUser.role
+            }
+        })
+    } catch(error){
+        return res.status(500).json({message: 'Server Error'});
+    }
+}
+
+
+exports.getCurrentUser = async(req, res) => {
+    try{
+        if(!req.user){
+            return res.status(403).json({error: 'User not authenticated'})
+        };
+        const user = await User.findById(req.user.id).select("-password");
+        if(!user){
+            return res.status(404).json({error: 'User not found'})
+        }
+        res.status(200).json({user});  
+    }catch(error){
+        return res.status(500).json({message: 'Server Error'});
     }
 }
