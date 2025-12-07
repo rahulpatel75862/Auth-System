@@ -1,0 +1,94 @@
+/* src/pages/dashboard.css */
+
+/* user container dropdown */
+.uc-dropdown {
+    position: relative;
+    display: inline-block;
+    margin-right: 12px;
+  }
+  
+  /* trigger button */
+  .uc-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 8px;
+  }
+  .uc-trigger:hover { background: rgba(16,24,40,0.02); }
+  
+  /* avatar circle */
+  .uc-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(90deg,#6e8efb,#a777e3);
+    color: white;
+    font-weight: 700;
+  }
+  
+  /* menu */
+  .uc-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    min-width: 160px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(16,24,40,0.08);
+    border: 1px solid rgba(16,24,40,0.04);
+    transform-origin: top right;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.12s ease, transform 0.12s ease;
+    transform: translateY(-6px) scale(0.98);
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    padding: 6px;
+  }
+  
+  /* when open */
+  .uc-dropdown.uc-open .uc-menu {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+  
+  /* menu items */
+  .uc-item {
+    padding: 10px 12px;
+    text-decoration: none;
+    color: #102a43;
+    border-radius: 8px;
+    display: block;
+    font-weight: 600;
+    text-align: left;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+  }
+  .uc-item:hover { background: rgba(16,24,40,0.03); }
+  
+  /* logout styled */
+  .uc-logout { color: #ef4444; }
+  
+  /* quick action small links */
+  .small-action {
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #e6e9ef;
+    text-decoration: none;
+    color: #0f172a;
+    background: white;
+    font-weight: 600;
+  }
+  .small-action:hover { background: #f8fafc; }
+  

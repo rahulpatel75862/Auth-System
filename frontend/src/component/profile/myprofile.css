@@ -1,0 +1,88 @@
+/* src/pages/profile.css */
+.profile-card {
+    width: 100%;
+    max-width: 820px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 8px 30px rgba(16,24,40,0.06);
+    border: 1px solid rgba(16,24,40,0.04);
+    margin: 0 auto;
+  }
+  
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #eef2f7;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+  }
+  
+  .profile-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(90deg,#6e8efb,#a777e3);
+    color: white;
+    font-weight: 700;
+    font-size: 24px;
+  }
+  
+  .profile-meta h2 {
+    font-size: 20px;
+    margin: 0;
+  }
+  
+  .muted {
+    color: #6b7280;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  
+  /* form */
+  .profile-form {
+    padding-top: 12px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .profile-form label {
+    margin-top: 10px;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #334155;
+  }
+  
+  .profile-form input {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #e6e9ef;
+    font-size: 14px;
+    background: linear-gradient(180deg,#fff,#fbfdff);
+  }
+  
+  .profile-form .btn {
+    margin-top: 8px;
+  }
+  
+  /* success message */
+  .success {
+    background: #ecfdf5;
+    color: #065f46;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(6,95,70,0.06);
+    font-weight: 600;
+  }
+  
+  /* responsive */
+  @media (max-width: 640px) {
+    .profile-card { padding: 14px; margin: 12px; }
+    .profile-header { gap: 10px; }
+    .profile-avatar { width: 56px; height: 56px; font-size: 20px; }
+  }
+  
