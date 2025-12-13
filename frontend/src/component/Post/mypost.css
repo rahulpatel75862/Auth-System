@@ -1,0 +1,97 @@
+
+
+.mp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  
+  .mp-controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .mp-search {
+    padding: 10px 12px;
+    width: 300px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    outline: none;
+  }
+  
+  .mp-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  
+  .mp-card {
+    padding: 14px;
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 14px rgba(16,24,40,0.05);
+  }
+  
+  .mp-title {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 17px;
+    font-weight: 600;
+  }
+  
+  .mp-options {
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  
+  .mp-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .mp-link {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  
+  .mp-delete {
+    background: #fff0f0;
+    color: #ef4444;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(239,68,68,0.3);
+    cursor: pointer;
+  }
+  
+  .mp-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 18px;
+    align-items: center;
+  }
+  
+  .mp-pagebtn {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    cursor: pointer;
+  }
+  
+  @media (max-width: 900px) {
+    .mp-list {
+      grid-template-columns: 1fr;
+    }
+    .mp-search {
+      width: 100%;
+    }
+  }
+  

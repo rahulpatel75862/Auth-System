@@ -73,7 +73,7 @@ exports.updateUser = async(req, res) => {
             }
             fields.role = req.body.role;
         }
-        const updateUser = await User.findByIdAndUpdate(targetId, fields, {new:true, runvalidators: true});
+        const updateUser = await User.findByIdAndUpdate(targetId, fields, {new:true, runValidators: true});
         if(!updateUser){
             return res.status(404).json({error: 'user does not exists'});
         }

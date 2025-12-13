@@ -46,6 +46,7 @@ const SignUp = () => {
       setUsername("");
       setEmail("");
       setPassword("");
+      navigate('/userDashboard');
     } catch (err) {
       setError(
         err?.response?.data?.error ||
@@ -86,7 +87,7 @@ const SignUp = () => {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="*********"
           />
-          {password.trim().length>0 && password.trim().length<12 && <div className="error">'Password must be under 12 characters'</div>}
+          {password.trim().length>12 && <div className="error">'Password must be under 12 characters'</div>}
           <button
             onClick={handleRegisterUser}
             className="btn"

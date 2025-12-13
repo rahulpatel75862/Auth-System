@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import "./AllPosts.css";
@@ -46,8 +46,80 @@ const AllPosts = () => {
     };
     fetchPosts();
   }, []);
-  console.log('Fetched Posts:', posts)
-  console.log('question', posts.map(p=>p.question));
+
+  const filtered = (list, query) => {
+    if (!query || !query.trim().length === 0) {
+      return list;
+    }
+    const q = query.trim().toLowerCase();
+    return list.filter((l) => String(l.question).toLowerCase().includes(q));
+  };
+  const filteredPosts = filtered(posts, query);
+  const sorts = (list, sortOrder) => {
+    const copy = list.slice();
+    copy.sort((a, b) => {
+      const ta = new Date(a.createdAt).getTime();
+      const tb = new Date(b.createdAt).getTime();
+      return sortOrder === "newest" ? tb - ta : ta - tb;
+    });
+    return copy;
+  };
+  const sortedPosts = sorts(filteredPosts, sort);
+  const paginated = (list, page, pageSize) => {
+    const total = list.length;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const pagedItems = list.slice(start, end);
+    return { pagedItems, totalPages, total };
+  };
+
+  const { pagedItems, totalPages, total } = paginated(
+    sortedPosts,
+    page,
+    pageSize
+  );
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    } else if (page < 1) {
+      setPage(1);
+    }
+  }, [page, totalPages]);
+
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setErr("Not Authenticated");
+        return;
+      }
+      await axios.delete(`http://localhost:5000/api/posts/delete/post/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setPosts((p) => p.filter((post) => post._id !== id));
+    } catch (error) {
+      setErr(
+        response?.data?.error ||
+          response?.data?.message ||
+          "Failed to delete post"
+      );
+    }
+  };
+
+  const currentUser = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user"));
+    } catch (error) {
+      return null;
+    }
+  });
+  const userId = currentUser?.id || null;
+  const isAdmin = currentUser?.role === "admin";
+
   return (
     <div style={{ maxWidth: 1100, margin: "18px auto", padding: 12 }}>
       <div className="vp-controls">
@@ -86,40 +158,62 @@ const AllPosts = () => {
       </div>
 
       <div className="vp-list">
-        <article className="vp-card">
-          <header className="vp-card-head">
-            <h3 className="vp-title"></h3>
-            <div className="vp-meta">
-              <span></span>
-              <span> • </span>
-              <span></span>
-            </div>
-          </header>
+        {loading ? (
+          <p>Loading Posts.....</p>
+        ) : err ? (
+          <p style={{ color: "red" }}>{err}</p>
+        ) : pagedItems.length === 0 ? (
+          <p>No Posts found</p>
+        ) : (
+          pagedItems.map((p) => (
+            <article key={p._id} className="vp-card">
+              <header className="vp-card-head">
+                <h3 className="vp-title">{p.question}</h3>
+                <div className="vp-meta">
+                  <span>{p.author?.username}</span>
+                  <span> • </span>
+                  <span>{p.createdAt}</span>
+                </div>
+              </header>
 
-          <div className="vp-body">
-            <div className="vp-options">
-              <div className="opt">A. </div>
-              <div className="opt">B. </div>
-              <div className="opt">C. </div>
-              <div className="opt">D. </div>
-            </div>
-          </div>
+              <div className="vp-body">
+                <div className="vp-options">
+                  <div className="opt">A. {p.option1}</div>
+                  <div className="opt">B. {p.option2}</div>
+                  <div className="opt">C. {p.option3}</div>
+                </div>
+              </div>
 
-          <footer className="vp-actions">
-            <Link className="vp-link">View</Link>
+              <footer className="vp-actions">
+                <Link className="vp-link">View</Link>
 
-            {/* show edit/delete if user is author or admin */}
-            <>
-              <Link className="vp-link">Edit</Link>
-              <button className="vp-delete">Delete</button>
-            </>
-          </footer>
-        </article>
+                {/* show edit/delete if user is author or admin */}
+                {(isAdmin ||
+                  String(userId) ===
+                    String(p.author?._id || p.author)) && (
+                  <>
+                    <Link to={`/edit/${p._id}`} className="vp-link">
+                      Edit
+                    </Link>
+                    <button
+                      className="vp-delete"
+                      onClick={() => handleDelete(p._id)}
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
+              </footer>
+            </article>
+          ))
+        )}
       </div>
 
       {/* pagination */}
       <div className="vp-pagination">
-        <div></div>
+        <div>
+          Page {page} of {totalPages} of total {total} posts
+        </div>
 
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <button
@@ -129,7 +223,13 @@ const AllPosts = () => {
           >
             Prev
           </button>
-          <button className="vp-pagebtn">Next</button>
+          <button
+            className="vp-pagebtn"
+            onClick={() => setPage((p) => Math.min(totalPages, 1 + p))}
+            disabled={page >= totalPages}
+          >
+            Next
+          </button>
         </div>
       </div>
     </div>
